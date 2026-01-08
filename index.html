@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旗取り合戦オセロ</title>
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="旗取りオセロ">
+    <link rel="apple-touch-icon" href="icon.jpg">
+
+    <style>
+        /* 全体のデザイン */
+        body {
+            font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic Pro", sans-serif;
+            background-color: #e0f7fa; /* 空のような薄い水色 */
+            color: #37474f;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+
+        h1 {
+            color: #0277bd;
+            margin: 10px 0;
+            font-size: 24px;
+            text-shadow: 1px 1px 0px white;
+            padding-right: 40px; 
+            padding-left: 40px;
+        }
+
+        /* --- ハンバーガーメニュー --- */
+        #menu-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 200;
+        }
+
+        #hamburger-btn {
+            background: white;
+            border: 2px solid #0277bd;
+            color: #0277bd;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #menu-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border: 2px solid #0277bd;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 160px;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #menu-dropdown.show {
+            display: flex;
+        }
+
+        .menu-item {
+            background: #e1f5fe;
+            color: #0277bd;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+        }
+        .menu-item:hover {
+            background: #b3e5fc;
+        }
+        /* ----------------------- */
+
+        /* 上部のルール表示エリア */
+        #rule-area {
+            background: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid #ffca28; /* フラッグ色に合わせる */
+        }
+
+        /* 下部のターン表示エリア */
+        #turn-area {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 15px; /* 盤面の下 */
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid #4fc3f7;
+        }
+
+        .status-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .turn-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* 盤面のデザイン */
+        #board-container {
+            background-color: #5d4037;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
+            gap: 2px;
+            background-color: #3e2723;
+            border: 2px solid #3e2723;
+        }
+
+        /* 個々のマス */
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: #8bc34a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        /* ターゲット（フラッグ） */
+        .target-mark {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #ffca28;
+            box-shadow: inset 0 0 10px #ff6f00;
+            box-sizing: border-box;
+            z-index: 1;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1.0; }
+            100% { opacity: 0.6; }
+        }
+        
+        .target-icon {
+            position: absolute;
+            font-size: 24px;
+            z-index: 2;
+            top: -4px;
+            right: -4px;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* 石のデザイン */
+        .disc {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+            z-index: 10;
+            transition: transform 0.2s ease-in;
+        }
+
+        .disc.black {
+            background-color: #212121;
+            background: radial-gradient(circle at 10px 10px, #424242, #000);
+        }
+        .disc.white {
+            background-color: #ffffff;
+            background: radial-gradient(circle at 10px 10px, #fff, #e0e0e0);
+            border: 1px solid #ccc;
+        }
+
+        /* ヒント */
+        .hint {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+
+        /* 結果表示モーダル */
+        #result-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            z-index: 100;
+            text-align: center;
+            width: 85%;
+            max-width: 320px;
+            border: 4px solid #0277bd;
+        }
+
+        #result-modal button {
+            background-color: #0277bd;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 0 #01579b;
+        }
+        #result-modal button:active {
+            box-shadow: 0 2px 0 #01579b;
+            transform: translateY(2px);
+        }
+
+        @media (max-width: 380px) {
+            #board {
+                grid-template-columns: repeat(8, 36px);
+                grid-template-rows: repeat(8, 36px);
+            }
+            .cell { width: 36px; height: 36px; }
+            .disc { width: 28px; height: 28px; }
+        }
+
+        /* --- PWA ポップアップ --- */
+        #pwa-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid #0277bd;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); }
+            to { transform: translate(-50%, 0); }
+        }
+
+        .pwa-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pwa-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .pwa-text {
+            flex: 1;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .pwa-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ハンバーガーメニュー -->
+    <div id="menu-container">
+        <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
+        <div id="menu-dropdown">
+            <button class="menu-item" onclick="undoGame()">↩️ 待った</button>
+            <button class="menu-item" onclick="resetGame()">🔄 最初から</button>
+            <button class="menu-item" onclick="toggleMenu()" style="background:#eee; color:#666; text-align:center;">閉じる</button>
+        </div>
+    </div>
+
+    <h1>🚩 旗取り合戦オセロ 🚩</h1>
+
+    <!-- 上部：ルール表示 -->
+    <div id="rule-area">
+        <div style="font-size:14px; color:#d84315; font-weight:bold;">
+            終了時に「🚩」のマスにいた色が勝利！
+        </div>
+    </div>
+
+    <div id="board-container">
+        <div id="board"></div>
+    </div>
+
+    <!-- 下部：ターン表示 -->
+    <div id="turn-area">
+        <div id="turn-display">
+            <span class="turn-indicator" id="turn-color" style="background: #212121;"></span>
+            <span id="status-msg" class="status-text">黒の番です</span>
+        </div>
+    </div>
+
+    <div id="result-modal">
+        <h2 id="winner-title" style="margin: 0 0 10px 0;">勝敗結果</h2>
+        <div style="font-size: 40px; margin: 10px;">🚩</div>
+        <div id="result-detail" style="text-align: center; margin: 10px 0; line-height: 1.5;"></div>
+        
+        <div style="display:flex; justify-content: space-around; gap:10px;">
+            <button onclick="undoGame()" style="background-color:#78909c; font-size:14px; padding:10px 15px;">待った</button>
+            <button onclick="resetGame()">もう一回</button>
+        </div>
+    </div>
+
+    <!-- PWA ポップアップ (iOS用) -->
+    <div id="pwa-prompt">
+        <div class="pwa-content">
+            <img src="icon.jpg" class="pwa-icon" alt="App Icon">
+            <div class="pwa-text">
+                <strong>ホーム画面に追加して遊ぼう！</strong><br>
+                下の <img src="https://developer.apple.com/design/human-interface-guidelines/foundations/images/icons/sharing/share.png" width="16" style="vertical-align:middle;"> 共有ボタンから「ホーム画面に追加」を選択してください。
+            </div>
+            <button class="pwa-close" onclick="closePwaPrompt()">×</button>
+        </div>
+    </div>
+
+
+    <script>
+        const BOARD_SIZE = 8;
+        const BLACK = 1;
+        const WHITE = 2;
+        let board = [];
+        let currentTurn = BLACK;
+        let gameOver = false;
+        let targetPos = {r: -1, c: -1}; // フラッグの位置
+        
+        let history = [];
+
+        const DIRECTIONS = [
+            [-1, -1], [-1, 0], [-1, 1],
+            [0, -1],           [0, 1],
+            [1, -1],  [1, 0],  [1, 1]
+        ];
+
+        function initGame() {
+            board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0));
+            
+            // 初期配置
+            board[3][3] = WHITE;
+            board[3][4] = BLACK;
+            board[4][3] = BLACK;
+            board[4][4] = WHITE;
+
+            // フラッグの位置をランダムに決定
+            setRandomTarget();
+
+            currentTurn = BLACK;
+            gameOver = false;
+            history = [];
+
+            document.getElementById('result-modal').style.display = 'none';
+            document.getElementById('menu-dropdown').classList.remove('show');
+            
+            renderBoard();
+            updateStatus();
+        }
+
+        function setRandomTarget() {
+            let r, c;
+            do {
+                r = Math.floor(Math.random() * BOARD_SIZE);
+                c = Math.floor(Math.random() * BOARD_SIZE);
+            } while (
+                (r === 3 && c === 3) ||
+                (r === 3 && c === 4) ||
+                (r === 4 && c === 3) ||
+                (r === 4 && c === 4)
+            );
+
+            targetPos = {r: r, c: c};
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menu-dropdown');
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            } else {
+                menu.classList.add('show');
+            }
+        }
+
+        function saveHistory() {
+            const boardCopy = board.map(row => [...row]);
+            history.push({
+                board: boardCopy,
+                turn: currentTurn,
+                gameOver: gameOver
+            });
+        }
+
+        function undoGame() {
+            if (history.length === 0) {
+                alert("これ以上戻れません（初期状態です）");
+                return;
+            }
+
+            const prevState = history.pop();
+            board = prevState.board;
+            currentTurn = prevState.turn;
+            gameOver = prevState.gameOver;
+
+            document.getElementById('result-modal').style.display = 'none';
+            document.getElementById('menu-dropdown').classList.remove('show');
+
+            renderBoard();
+            updateStatus();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+
+            const validMoves = getValidMoves(currentTurn);
+
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    if (r === targetPos.r && c === targetPos.c) {
+                        const mark = document.createElement('div');
+                        mark.className = 'target-mark';
+                        cell.appendChild(mark);
+                        
+                        const icon = document.createElement('div');
+                        icon.className = 'target-icon';
+                        icon.innerText = '🚩';
+                        cell.appendChild(icon);
+                    }
+
+                    if (board[r][c] === BLACK) {
+                        const disc = document.createElement('div');
+                        disc.className = 'disc black';
+                        cell.appendChild(disc);
+                    } else if (board[r][c] === WHITE) {
+                        const disc = document.createElement('div');
+                        disc.className = 'disc white';
+                        cell.appendChild(disc);
+                    } else {
+                        if (!gameOver && validMoves.some(m => m.r === r && m.c === c)) {
+                            const hint = document.createElement('div');
+                            hint.className = 'hint';
+                            cell.appendChild(hint);
+                            cell.onclick = () => placeDisc(r, c);
+                        }
+                    }
+
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        function updateStatus() {
+            const statusMsg = document.getElementById('status-msg');
+            const turnColor = document.getElementById('turn-color');
+            
+            if (gameOver) return;
+
+            if (currentTurn === BLACK) {
+                statusMsg.innerText = "黒の番です";
+                turnColor.style.background = "#212121";
+            } else {
+                statusMsg.innerText = "白の番です";
+                turnColor.style.background = "#ffffff";
+            }
+        }
+
+        function placeDisc(r, c) {
+            if (gameOver) return;
+
+            const flipCells = getFlipCells(r, c, currentTurn);
+            if (flipCells.length === 0) return;
+
+            saveHistory();
+
+            board[r][c] = currentTurn;
+            
+            flipCells.forEach(pos => {
+                board[pos.r][pos.c] = currentTurn;
+            });
+
+            changeTurn();
+        }
+
+        function changeTurn() {
+            const nextTurn = currentTurn === BLACK ? WHITE : BLACK;
+            
+            if (getValidMoves(nextTurn).length > 0) {
+                currentTurn = nextTurn;
+            } else {
+                if (getValidMoves(currentTurn).length === 0) {
+                    endGame();
+                    return;
+                } else {
+                    alert((nextTurn === BLACK ? "黒" : "白") + "は置ける場所がないためパスします");
+                }
+            }
+            renderBoard();
+            updateStatus();
+        }
+
+        function getFlipCells(r, c, player) {
+            if (board[r][c] !== 0) return [];
+
+            let result = [];
+            const opponent = player === BLACK ? WHITE : BLACK;
+
+            DIRECTIONS.forEach(dir => {
+                let temp = [];
+                let tr = r + dir[0];
+                let tc = c + dir[1];
+
+                while (tr >= 0 && tr < BOARD_SIZE && tc >= 0 && tc < BOARD_SIZE) {
+                    if (board[tr][tc] === opponent) {
+                        temp.push({r: tr, c: tc});
+                    } else if (board[tr][tc] === player) {
+                        if (temp.length > 0) {
+                            result = result.concat(temp);
+                        }
+                        break;
+                    } else {
+                        break;
+                    }
+                    tr += dir[0];
+                    tc += dir[1];
+                }
+            });
+
+            return result;
+        }
+
+        function getValidMoves(player) {
+            let moves = [];
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    if (getFlipCells(r, c, player).length > 0) {
+                        moves.push({r, c});
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function endGame() {
+            gameOver = true;
+            renderBoard();
+
+            const flagOwner = board[targetPos.r][targetPos.c];
+            
+            const modal = document.getElementById('result-modal');
+            const title = document.getElementById('winner-title');
+            const detail = document.getElementById('result-detail');
+
+            let winMsg = "";
+            let color = "";
+            let detailMsg = "";
+
+            if (flagOwner === BLACK) {
+                winMsg = "黒の勝ち！🎉";
+                color = "#212121";
+                detailMsg = "見事、フラッグを確保しました！";
+            } else if (flagOwner === WHITE) {
+                winMsg = "白の勝ち！🎉";
+                color = "#888"; 
+                detailMsg = "見事、フラッグを確保しました！";
+            } else {
+                winMsg = "引き分け...";
+                color = "#555";
+                detailMsg = "フラッグのあるマスには<br>誰も到達できませんでした...";
+            }
+
+            title.innerText = winMsg;
+            title.style.color = color;
+            detail.innerHTML = detailMsg;
+
+            modal.style.display = 'block';
+        }
+
+        function resetGame() {
+            if(confirm("ゲームをリセットして最初から始めますか？")) {
+                initGame();
+            }
+        }
+
+        // --- PWA Logic ---
+        function showPwaPrompt() {
+            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+            const hasDismissed = localStorage.getItem('pwaPromptDismissed');
+
+            if (isIos && !isStandalone && !hasDismissed) {
+                document.getElementById('pwa-prompt').style.display = 'block';
+            }
+        }
+
+        function closePwaPrompt() {
+            document.getElementById('pwa-prompt').style.display = 'none';
+            localStorage.setItem('pwaPromptDismissed', 'true');
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then((reg) => {
+                    console.log('SW registered:', reg);
+                }).catch((err) => {
+                    console.error('SW registration failed:', err);
+                });
+            });
+        }
+
+        window.onload = () => {
+            showPwaPrompt();
+            initGame();
+        };
+
+
+    </script>
+</body>
+</html>

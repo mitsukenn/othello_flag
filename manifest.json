@@ -1,0 +1,21 @@
+{
+  "name": "旗取り合戦オセロ",
+  "short_name": "旗取りオセロ",
+  "description": "フラッグを奪い合う、新感覚オセロゲーム！",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#e0f7fa",
+  "theme_color": "#0277bd",
+  "icons": [
+    {
+      "src": "icon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
