@@ -602,8 +602,8 @@
 
 <body>
 
-    <!-- スタート画面 -->
-    <div id="start-screen">
+    <!-- スタート画面（初期は非表示、メニューから表示） -->
+    <div id="start-screen" style="display:none;">
         <h1>🚩 陣取りオセロ 🚩</h1>
 
         <div class="setting-group">
@@ -617,8 +617,8 @@
         <div class="setting-group">
             <label>🏆 勝利条件</label>
             <select id="start-rule">
-                <option value="false">終了時に「🚩」を持っていたら勝ち</option>
                 <option value="true">「🚩」を取った瞬間に即勝利！ (先取)</option>
+                <option value="false">終了時に「🚩」を持っていたら勝ち</option>
             </select>
         </div>
 
@@ -658,7 +658,7 @@
             <div id="menu-dropdown">
                 <button class="menu-item" onclick="undoGame()">↩️ 待った</button>
                 <button class="menu-item" onclick="resetGame()">🔄 最初から</button>
-                <button class="menu-item" onclick="backToStart()">🏠 スタートに戻る</button>
+                <button class="menu-item" onclick="backToStart()">⚙️ 設定を変更</button>
                 <button class="menu-item" onclick="toggleMenu()"
                     style="background:#eee; color:#666; text-align:center;">閉じる</button>
             </div>
@@ -1012,7 +1012,7 @@
         }
 
         function backToStart() {
-            if (confirm("ゲームを中断して最初の画面に戻りますか？")) {
+            if (confirm("ゲームを中断して設定画面に戻りますか？")) {
                 stopTimer();
                 document.getElementById('menu-dropdown').classList.remove('show');
                 document.getElementById('game-screen').style.display = 'none';
@@ -1578,6 +1578,20 @@
 
         window.onload = () => {
             showPwaPrompt();
+            // デフォルト設定で即スタート（2人対戦・旗先取で即勝利・オプションなし）
+            isCpuMode = false;
+            isSuddenDeathMode = true;
+            isMultiFlagMode = false;
+            isBombMode = false;
+            isTimerMode = false;
+
+            document.getElementById('badge-opponent').innerText = "👤 2人で遊ぶ";
+            document.getElementById('badge-rule').innerText = "⚡ 旗先取で勝利";
+            document.getElementById('timer-display').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+
+            initGame();
         };
 
     </script>
