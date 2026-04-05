@@ -17,7 +17,6 @@
         body {
             font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic Pro", sans-serif;
             background-color: #e0f7fa;
-            /* 空のような薄い水色 */
             color: #37474f;
             text-align: center;
             display: flex;
@@ -95,21 +94,6 @@
             background: #b3e5fc;
         }
 
-        /* ----------------------- */
-
-        /* 上部のルール表示エリア */
-        #rule-area {
-            background: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 15px;
-            width: 90%;
-            max-width: 400px;
-            border: 2px solid #ffca28;
-            /* フラッグ色に合わせる */
-        }
-
         /* 下部のターン表示エリア */
         #turn-area {
             background: white;
@@ -117,7 +101,6 @@
             border-radius: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-top: 15px;
-            /* 盤面の下 */
             width: 90%;
             max-width: 400px;
             border: 2px solid #4fc3f7;
@@ -148,8 +131,8 @@
 
         #board {
             display: grid;
-            grid-template-columns: repeat(8, 40px);
-            grid-template-rows: repeat(8, 40px);
+            grid-template-columns: repeat(6, 48px);
+            grid-template-rows: repeat(6, 48px);
             gap: 2px;
             background-color: #3e2723;
             border: 2px solid #3e2723;
@@ -157,8 +140,8 @@
 
         /* 個々のマス */
         .cell {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             background-color: #8bc34a;
             display: flex;
             justify-content: center;
@@ -181,47 +164,155 @@
         }
 
         @keyframes pulse {
-            0% {
-                opacity: 0.6;
-            }
-
-            50% {
-                opacity: 1.0;
-            }
-
-            100% {
-                opacity: 0.6;
-            }
+            0% { opacity: 0.6; }
+            50% { opacity: 1.0; }
+            100% { opacity: 0.6; }
         }
 
         .target-icon {
             position: absolute;
-            font-size: 24px;
             z-index: 2;
-            top: -4px;
-            right: -4px;
-            text-shadow: 1px 1px 2px black;
+            top: -2px;
+            right: -2px;
+            width: 22px;
+            height: 22px;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));
         }
 
-        /* 石のデザイン */
+        /* 爆弾マス */
+        .bomb-mark {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #f44336;
+            box-shadow: inset 0 0 10px #b71c1c;
+            box-sizing: border-box;
+            z-index: 1;
+            opacity: 0.7;
+            animation: bombPulse 1.5s infinite;
+        }
+
+        @keyframes bombPulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.5; }
+        }
+
+        .bomb-icon {
+            position: absolute;
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 28px;
+            height: 28px;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.4));
+        }
+
+        /* 石のデザイン (3D対応) */
         .disc {
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
             z-index: 10;
-            transition: transform 0.2s ease-in;
+            transition: transform 0.4s ease-in-out, background-color 0s 0.2s;
         }
 
         .disc.black {
             background-color: #212121;
-            background: radial-gradient(circle at 10px 10px, #424242, #000);
+            background: radial-gradient(circle at 14px 14px, #424242, #000);
         }
 
         .disc.white {
             background-color: #ffffff;
-            background: radial-gradient(circle at 10px 10px, #fff, #e0e0e0);
+            background: radial-gradient(circle at 14px 14px, #fff, #e0e0e0);
             border: 1px solid #ccc;
+        }
+
+        .disc.flip {
+            transform: rotateY(180deg) scale(1.1);
+        }
+
+        /* --- トースト通知 --- */
+        #toast {
+            visibility: hidden;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px 24px;
+            position: fixed;
+            z-index: 300;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 個数表示用 */
+        #score-display {
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .score-box {
+            background: #f5f5f5;
+            padding: 5px 15px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .score-box.black-bg {
+            background: #e0e0e0;
+            color: #000;
+        }
+        .score-box.white-bg {
+            background: #fff;
+            color: #000;
+        }
+
+        /* 旗奪取エフェクト */
+        #flash-effect {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: white;
+            opacity: 0;
+            z-index: 999;
+            pointer-events: none;
+            transition: opacity 0.5s ease-out;
+        }
+        #flash-effect.flash {
+            opacity: 0.8;
+            transition: opacity 0.05s ease-in;
+        }
+
+        /* 爆発エフェクト */
+        #explosion-effect {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ff5722;
+            opacity: 0;
+            z-index: 999;
+            pointer-events: none;
+            transition: opacity 0.5s ease-out;
+        }
+        #explosion-effect.explode {
+            opacity: 0.6;
+            transition: opacity 0.05s ease-in;
         }
 
         /* ヒント */
@@ -268,21 +359,192 @@
             transform: translateY(2px);
         }
 
-        @media (max-width: 380px) {
+        /* タイマー表示 */
+        #timer-display {
+            display: none;
+            margin-top: 8px;
+        }
+        #timer-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #timer-bar {
+            width: 100%;
+            height: 100%;
+            background: #4caf50;
+            border-radius: 4px;
+            transition: width 0.2s linear;
+        }
+        #timer-bar.warning {
+            background: #ff9800;
+        }
+        #timer-bar.danger {
+            background: #f44336;
+        }
+        #timer-text {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+
+        @media (max-width: 340px) {
             #board {
-                grid-template-columns: repeat(8, 36px);
-                grid-template-rows: repeat(8, 36px);
+                grid-template-columns: repeat(6, 42px);
+                grid-template-rows: repeat(6, 42px);
             }
 
             .cell {
-                width: 36px;
-                height: 36px;
+                width: 42px;
+                height: 42px;
             }
 
             .disc {
-                width: 28px;
-                height: 28px;
+                width: 34px;
+                height: 34px;
             }
+        }
+
+        /* --- スタート画面 --- */
+        #start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            border: 4px solid #0277bd;
+            box-sizing: border-box;
+        }
+
+        #start-screen h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            padding: 0;
+        }
+
+        .setting-group {
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .setting-group label {
+            display: block;
+            font-weight: bold;
+            color: #0277bd;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .setting-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            font-size: 16px;
+            font-family: inherit;
+            background-color: #f9f9f9;
+        }
+
+        /* オプションチェックボックス */
+        .option-group {
+            width: 100%;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .option-group-title {
+            font-weight: bold;
+            color: #0277bd;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .option-item:has(input:checked) {
+            border-color: #0277bd;
+            background: #e1f5fe;
+        }
+        .option-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #0277bd;
+            cursor: pointer;
+        }
+        .option-label {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+        .option-desc {
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        #start-btn {
+            background-color: #ffca28;
+            color: #d84315;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 0 #f57f17;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        #start-btn:active {
+            box-shadow: 0 2px 0 #f57f17;
+            transform: translateY(2px);
+        }
+
+        /* --- ゲーム画面 --- */
+        #game-screen {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 上部のモード表示バッジ */
+        #mode-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            width: 90%;
+            max-width: 400px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mode-badge {
+            background: #e1f5fe;
+            color: #0277bd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #0277bd;
         }
 
         /* --- PWA ポップアップ --- */
@@ -304,13 +566,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                transform: translate(-50%, 100%);
-            }
-
-            to {
-                transform: translate(-50%, 0);
-            }
+            from { transform: translate(-50%, 100%); }
+            to { transform: translate(-50%, 0); }
         }
 
         .pwa-content {
@@ -345,41 +602,108 @@
 
 <body>
 
-    <!-- ハンバーガーメニュー -->
-    <div id="menu-container">
-        <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
-        <div id="menu-dropdown">
-            <button class="menu-item" onclick="undoGame()">↩️ 待った</button>
-            <button class="menu-item" onclick="resetGame()">🔄 最初から</button>
-            <button class="menu-item" onclick="toggleMenu()"
-                style="background:#eee; color:#666; text-align:center;">閉じる</button>
+    <!-- スタート画面 -->
+    <div id="start-screen">
+        <h1>🚩 陣取りオセロ 🚩</h1>
+
+        <div class="setting-group">
+            <label>👤 対戦相手</label>
+            <select id="start-cpu">
+                <option value="false">2人で遊ぶ（ローカル対戦）</option>
+                <option value="true">1人で遊ぶ（コンピュータ対戦）</option>
+            </select>
         </div>
-    </div>
 
-    <h1>🚩 旗取り合戦オセロ 🚩</h1>
-
-    <!-- 上部：ルール表示 -->
-    <div id="rule-area">
-        <div style="font-size:14px; color:#d84315; font-weight:bold;">
-            終了時に「🚩」のマスにいた色が勝利！
+        <div class="setting-group">
+            <label>🏆 勝利条件</label>
+            <select id="start-rule">
+                <option value="false">終了時に「🚩」を持っていたら勝ち</option>
+                <option value="true">「🚩」を取った瞬間に即勝利！ (先取)</option>
+            </select>
         </div>
-    </div>
 
-    <div id="board-container">
-        <div id="board"></div>
-    </div>
-
-    <!-- 下部：ターン表示 -->
-    <div id="turn-area">
-        <div id="turn-display">
-            <span class="turn-indicator" id="turn-color" style="background: #212121;"></span>
-            <span id="status-msg" class="status-text">黒の番です</span>
+        <div class="option-group">
+            <div class="option-group-title">🎮 追加オプション</div>
+            <label class="option-item">
+                <input type="checkbox" id="opt-multi-flag">
+                <div>
+                    <div class="option-label">🚩 旗を3個配置</div>
+                    <div class="option-desc">旗が3つに！より多く確保した方が勝ち</div>
+                </div>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" id="opt-bomb">
+                <div>
+                    <div class="option-label">💣 爆弾マスを配置</div>
+                    <div class="option-desc">踏むと周囲の石が吹き飛ぶ！</div>
+                </div>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" id="opt-timer">
+                <div>
+                    <div class="option-label">⏱ 制限時間あり（15秒）</div>
+                    <div class="option-desc">時間切れでパス扱い</div>
+                </div>
+            </label>
         </div>
+
+        <button id="start-btn" onclick="startGameFromScreen()">ゲームスタート！</button>
     </div>
+
+    <!-- ゲーム画面（初期表示は非表示） -->
+    <div id="game-screen">
+        <!-- ハンバーガーメニュー -->
+        <div id="menu-container">
+            <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
+            <div id="menu-dropdown">
+                <button class="menu-item" onclick="undoGame()">↩️ 待った</button>
+                <button class="menu-item" onclick="resetGame()">🔄 最初から</button>
+                <button class="menu-item" onclick="backToStart()">🏠 スタートに戻る</button>
+                <button class="menu-item" onclick="toggleMenu()"
+                    style="background:#eee; color:#666; text-align:center;">閉じる</button>
+            </div>
+        </div>
+
+        <h1>🚩 旗取り合戦オセロ 🚩</h1>
+
+        <!-- 現在のモード表示 -->
+        <div id="mode-badges">
+            <div class="mode-badge" id="badge-opponent">2人で遊ぶ</div>
+            <div class="mode-badge" id="badge-rule">終了時に判定</div>
+        </div>
+
+        <div id="board-container">
+            <div id="board"></div>
+        </div>
+
+        <!-- 下部：ターン表示 -->
+        <div id="turn-area">
+            <div id="turn-display">
+                <span class="turn-indicator" id="turn-color" style="background: #212121;"></span>
+                <span id="status-msg" class="status-text">黒の番です</span>
+            </div>
+            <div id="score-display">
+                <div class="score-box black-bg">黒: <span id="score-black-val">2</span></div>
+                <div class="score-box white-bg">白: <span id="score-white-val">2</span></div>
+            </div>
+            <div id="timer-display">
+                <div id="timer-bar-container"><div id="timer-bar"></div></div>
+                <div id="timer-text">残り 15秒</div>
+            </div>
+        </div>
+    </div> <!-- /game-screen -->
+
+    <!-- トースト通知 -->
+    <div id="toast"></div>
+
+    <!-- フラッシュエフェクト -->
+    <div id="flash-effect"></div>
+    <!-- 爆発エフェクト -->
+    <div id="explosion-effect"></div>
 
     <div id="result-modal">
         <h2 id="winner-title" style="margin: 0 0 10px 0;">勝敗結果</h2>
-        <div style="font-size: 40px; margin: 10px;">🚩</div>
+        <div id="result-icon" style="margin: 10px; display:flex; justify-content:center;"></div>
         <div id="result-detail" style="text-align: center; margin: 10px 0; line-height: 1.5;"></div>
 
         <div style="display:flex; justify-content: space-around; gap:10px;">
@@ -406,12 +730,12 @@
 
     <script>
         // --- Audio Manager ---
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
         function initAudio() {
             if (!audioCtx) {
-                audioCtx = new AudioContext();
+                audioCtx = new AudioCtxClass();
             }
         }
 
@@ -451,21 +775,102 @@
                 osc.stop(now + start + duration);
             };
 
-            // テッテレー！ (C-E-G-C high)
-            playNote(523.25, 0, 0.1);   // C5
-            playNote(659.25, 0.1, 0.1); // E5
-            playNote(783.99, 0.2, 0.1); // G5
-            playNote(1046.50, 0.3, 0.4); // C6
+            playNote(523.25, 0, 0.1);
+            playNote(659.25, 0.1, 0.1);
+            playNote(783.99, 0.2, 0.1);
+            playNote(1046.50, 0.3, 0.4);
         }
 
-        const BOARD_SIZE = 8;
+        function playExplosionSound() {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        // --- SVG Icons ---
+        function createFlagSVG() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.innerHTML = `
+                <line x1="6" y1="3" x2="6" y2="22" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M6 3 L20 7.5 L6 12 Z" fill="#e53935"/>
+                <path d="M6 3 L13 5.25 L6 7.5 Z" fill="#ef5350" opacity="0.7"/>
+                <circle cx="6" cy="3" r="1.2" fill="#ffca28"/>
+            `;
+            return svg;
+        }
+
+        function createBombSVG() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.innerHTML = `
+                <circle cx="12" cy="14" r="8" fill="#37474f"/>
+                <circle cx="12" cy="14" r="6.5" fill="#455a64"/>
+                <ellipse cx="9.5" cy="11.5" rx="2" ry="1.5" fill="rgba(255,255,255,0.15)" transform="rotate(-20 9.5 11.5)"/>
+                <rect x="11" y="2" width="2" height="5" rx="1" fill="#795548"/>
+                <path d="M13 4 Q16 2 18 3" stroke="#ff9800" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <circle cx="18.5" cy="2.5" r="1.8" fill="#ff5722" opacity="0.9"/>
+                <circle cx="18.5" cy="2.5" r="1" fill="#ffeb3b" opacity="0.8"/>
+            `;
+            return svg;
+        }
+
+        function createTrophySVG() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 48 48');
+            svg.setAttribute('width', '48');
+            svg.setAttribute('height', '48');
+            svg.innerHTML = `
+                <path d="M14 8 H34 V20 C34 28 28 32 24 34 C20 32 14 28 14 20 Z" fill="#ffca28"/>
+                <path d="M14 8 H24 V34 C20 32 14 28 14 20 Z" fill="#ffd54f"/>
+                <path d="M10 8 H14 V16 C10 16 8 14 8 12 V10 C8 9 9 8 10 8 Z" fill="#ffca28"/>
+                <path d="M34 8 H38 C39 8 40 9 40 10 V12 C40 14 38 16 34 16 Z" fill="#ffc107"/>
+                <rect x="20" y="34" width="8" height="4" rx="1" fill="#8d6e63"/>
+                <rect x="16" y="38" width="16" height="3" rx="1.5" fill="#a1887f"/>
+                <path d="M20 16 L24 12 L28 16 L26 16 L26 22 L22 22 L22 16 Z" fill="#fff8e1" opacity="0.5"/>
+            `;
+            return svg;
+        }
+
+        const BOARD_SIZE = 6;
 
         const BLACK = 1;
         const WHITE = 2;
         let board = [];
         let currentTurn = BLACK;
         let gameOver = false;
-        let targetPos = { r: -1, c: -1 }; // フラッグの位置
+
+        // 旗の位置（配列）
+        let targetPositions = [];
+
+        // 爆弾の位置（配列）
+        let bombPositions = [];
+
+        // 設定項目
+        let isCpuMode = false;
+        let isSuddenDeathMode = false;
+        let isMultiFlagMode = false;
+        let isBombMode = false;
+        let isTimerMode = false;
+
+        // タイマー関連
+        const TIMER_SECONDS = 15;
+        let timerInterval = null;
+        let timerRemaining = TIMER_SECONDS;
 
         let history = [];
 
@@ -475,17 +880,29 @@
             [1, -1], [1, 0], [1, 1]
         ];
 
+        // 初期配置のマス（6×6の中央2×2）
+        function isInitPosition(r, c) {
+            return (r === 2 || r === 3) && (c === 2 || c === 3);
+        }
+
         function initGame() {
             board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0));
 
-            // 初期配置
+            // 6×6の初期配置（中央2×2）
+            board[2][2] = WHITE;
+            board[2][3] = BLACK;
+            board[3][2] = BLACK;
             board[3][3] = WHITE;
-            board[3][4] = BLACK;
-            board[4][3] = BLACK;
-            board[4][4] = WHITE;
 
-            // フラッグの位置をランダムに決定
-            setRandomTarget();
+            // フラッグ配置
+            setRandomTargets();
+
+            // 爆弾配置
+            if (isBombMode) {
+                setRandomBombs();
+            } else {
+                bombPositions = [];
+            }
 
             currentTurn = BLACK;
             gameOver = false;
@@ -496,36 +913,152 @@
 
             renderBoard();
             updateStatus();
+            startTimer();
+
+            if (isCpuMode && currentTurn === WHITE) {
+                setTimeout(cpuMove, 500);
+            }
         }
 
-        function setRandomTarget() {
-            let r, c;
-            do {
-                r = Math.floor(Math.random() * BOARD_SIZE);
-                c = Math.floor(Math.random() * BOARD_SIZE);
-            } while (
-                (r === 3 && c === 3) ||
-                (r === 3 && c === 4) ||
-                (r === 4 && c === 3) ||
-                (r === 4 && c === 4)
-            );
+        function setRandomTargets() {
+            const count = isMultiFlagMode ? 3 : 1;
+            targetPositions = [];
 
-            targetPos = { r: r, c: c };
+            for (let i = 0; i < count; i++) {
+                let r, c;
+                do {
+                    r = Math.floor(Math.random() * BOARD_SIZE);
+                    c = Math.floor(Math.random() * BOARD_SIZE);
+                } while (
+                    isInitPosition(r, c) ||
+                    targetPositions.some(t => t.r === r && t.c === c)
+                );
+                targetPositions.push({ r, c });
+            }
+        }
+
+        function setRandomBombs() {
+            bombPositions = [];
+            const count = 2;
+            for (let i = 0; i < count; i++) {
+                let r, c;
+                do {
+                    r = Math.floor(Math.random() * BOARD_SIZE);
+                    c = Math.floor(Math.random() * BOARD_SIZE);
+                } while (
+                    isInitPosition(r, c) ||
+                    targetPositions.some(t => t.r === r && t.c === c) ||
+                    bombPositions.some(b => b.r === r && b.c === c)
+                );
+                bombPositions.push({ r, c });
+            }
+        }
+
+        function isTargetPos(r, c) {
+            return targetPositions.some(t => t.r === r && t.c === c);
+        }
+
+        function isBombPos(r, c) {
+            return bombPositions.some(b => b.r === r && b.c === c);
         }
 
         function toggleMenu() {
             const menu = document.getElementById('menu-dropdown');
-            if (menu.classList.contains('show')) {
-                menu.classList.remove('show');
-            } else {
-                menu.classList.add('show');
+            menu.classList.toggle('show');
+        }
+
+        function startGameFromScreen() {
+            isCpuMode = document.getElementById('start-cpu').value === "true";
+            isSuddenDeathMode = document.getElementById('start-rule').value === "true";
+            isMultiFlagMode = document.getElementById('opt-multi-flag').checked;
+            isBombMode = document.getElementById('opt-bomb').checked;
+            isTimerMode = document.getElementById('opt-timer').checked;
+
+            // バッジの表示更新
+            document.getElementById('badge-opponent').innerText = isCpuMode ? "💻 CPU対戦" : "👤 2人で遊ぶ";
+            document.getElementById('badge-rule').innerText = isSuddenDeathMode ? "⚡ 旗先取で勝利" : "🏁 終了時に判定";
+
+            // オプションバッジを動的追加
+            const badgesEl = document.getElementById('mode-badges');
+            // 既存のオプションバッジを削除
+            badgesEl.querySelectorAll('.opt-badge').forEach(e => e.remove());
+            if (isMultiFlagMode) {
+                const b = document.createElement('div');
+                b.className = 'mode-badge opt-badge';
+                b.innerText = '🚩×3';
+                badgesEl.appendChild(b);
             }
+            if (isBombMode) {
+                const b = document.createElement('div');
+                b.className = 'mode-badge opt-badge';
+                b.innerText = '💣 爆弾';
+                badgesEl.appendChild(b);
+            }
+            if (isTimerMode) {
+                const b = document.createElement('div');
+                b.className = 'mode-badge opt-badge';
+                b.innerText = '⏱ 15秒';
+                badgesEl.appendChild(b);
+            }
+
+            // タイマー表示
+            document.getElementById('timer-display').style.display = isTimerMode ? 'block' : 'none';
+
+            // 画面の切り替え
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+
+            initGame();
+        }
+
+        function backToStart() {
+            if (confirm("ゲームを中断して最初の画面に戻りますか？")) {
+                stopTimer();
+                document.getElementById('menu-dropdown').classList.remove('show');
+                document.getElementById('game-screen').style.display = 'none';
+                document.getElementById('start-screen').style.display = 'flex';
+                document.getElementById('result-modal').style.display = 'none';
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function playFlashEffect() {
+            const flash = document.getElementById('flash-effect');
+            flash.classList.add('flash');
+            setTimeout(() => { flash.classList.remove('flash'); }, 50);
+        }
+
+        function playExplosionEffect() {
+            const el = document.getElementById('explosion-effect');
+            el.classList.add('explode');
+            setTimeout(() => { el.classList.remove('explode'); }, 50);
+        }
+
+        function getStoneCount() {
+            let b = 0; let w = 0;
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    if (board[r][c] === BLACK) b++;
+                    else if (board[r][c] === WHITE) w++;
+                }
+            }
+            return { black: b, white: w };
         }
 
         function saveHistory() {
             const boardCopy = board.map(row => [...row]);
+            const bombsCopy = bombPositions.map(b => ({...b}));
             history.push({
                 board: boardCopy,
+                bombs: bombsCopy,
                 turn: currentTurn,
                 gameOver: gameOver
             });
@@ -539,6 +1072,7 @@
 
             const prevState = history.pop();
             board = prevState.board;
+            bombPositions = prevState.bombs;
             currentTurn = prevState.turn;
             gameOver = prevState.gameOver;
 
@@ -547,6 +1081,52 @@
 
             renderBoard();
             updateStatus();
+            startTimer();
+        }
+
+        // --- タイマー機能 ---
+        function startTimer() {
+            stopTimer();
+            if (!isTimerMode || gameOver) return;
+            if (isCpuMode && currentTurn === WHITE) return;
+
+            timerRemaining = TIMER_SECONDS;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                timerRemaining -= 0.2;
+                if (timerRemaining <= 0) {
+                    timerRemaining = 0;
+                    updateTimerDisplay();
+                    stopTimer();
+                    showToast("⏱ 時間切れ！パスします");
+                    setTimeout(() => {
+                        changeTurn();
+                    }, 500);
+                    return;
+                }
+                updateTimerDisplay();
+            }, 200);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const bar = document.getElementById('timer-bar');
+            const text = document.getElementById('timer-text');
+            const pct = (timerRemaining / TIMER_SECONDS) * 100;
+            bar.style.width = pct + '%';
+
+            bar.className = '';
+            if (pct <= 20) bar.className = 'danger';
+            else if (pct <= 50) bar.className = 'warning';
+
+            text.innerText = '残り ' + Math.ceil(timerRemaining) + '秒';
         }
 
         function renderBoard() {
@@ -560,24 +1140,39 @@
                     const cell = document.createElement('div');
                     cell.className = 'cell';
 
-                    if (r === targetPos.r && c === targetPos.c) {
+                    // 旗の表示
+                    if (isTargetPos(r, c)) {
                         const mark = document.createElement('div');
                         mark.className = 'target-mark';
                         cell.appendChild(mark);
 
                         const icon = document.createElement('div');
                         icon.className = 'target-icon';
-                        icon.innerText = '🚩';
+                        icon.appendChild(createFlagSVG());
+                        cell.appendChild(icon);
+                    }
+
+                    // 爆弾の表示（石が置かれていない場合のみアイコン表示）
+                    if (isBombPos(r, c) && board[r][c] === 0) {
+                        const mark = document.createElement('div');
+                        mark.className = 'bomb-mark';
+                        cell.appendChild(mark);
+
+                        const icon = document.createElement('div');
+                        icon.className = 'bomb-icon';
+                        icon.appendChild(createBombSVG());
                         cell.appendChild(icon);
                     }
 
                     if (board[r][c] === BLACK) {
                         const disc = document.createElement('div');
                         disc.className = 'disc black';
+                        disc.id = `disc-${r}-${c}`;
                         cell.appendChild(disc);
                     } else if (board[r][c] === WHITE) {
                         const disc = document.createElement('div');
                         disc.className = 'disc white';
+                        disc.id = `disc-${r}-${c}`;
                         cell.appendChild(disc);
                     } else {
                         if (!gameOver && validMoves.some(m => m.r === r && m.c === c)) {
@@ -606,6 +1201,10 @@
                 statusMsg.innerText = "白の番です";
                 turnColor.style.background = "#ffffff";
             }
+
+            const counts = getStoneCount();
+            document.getElementById('score-black-val').innerText = counts.black;
+            document.getElementById('score-white-val').innerText = counts.white;
         }
 
         function placeDisc(r, c) {
@@ -614,28 +1213,181 @@
             const flipCells = getFlipCells(r, c, currentTurn);
             if (flipCells.length === 0) return;
 
+            stopTimer();
             saveHistory();
 
-            // 音声再生
             playClickSound();
 
             // フラッグに関わるかチェック
-            const involveTarget = (r === targetPos.r && c === targetPos.c) ||
-                flipCells.some(pos => pos.r === targetPos.r && pos.c === targetPos.c);
+            const involveTarget = isTargetPos(r, c) ||
+                flipCells.some(pos => isTargetPos(pos.r, pos.c));
 
             if (involveTarget) {
-                setTimeout(playFanfareSound, 50); // 少し遅らせて華やかに
+                setTimeout(playFanfareSound, 50);
+                playFlashEffect();
             }
 
+            // 石を置く
             board[r][c] = currentTurn;
 
+            renderBoard();
+
+            const playerColor = currentTurn === BLACK ? 'black' : 'white';
+
+            // ひっくり返すアニメーション
             flipCells.forEach(pos => {
+                const discEl = document.getElementById(`disc-${pos.r}-${pos.c}`);
+                if (discEl) {
+                    discEl.classList.add('flip');
+                    setTimeout(() => {
+                        discEl.className = `disc ${playerColor}`;
+                    }, 200);
+                }
                 board[pos.r][pos.c] = currentTurn;
             });
 
-            changeTurn();
+            // 爆弾チェック
+            const bombIndex = bombPositions.findIndex(b => b.r === r && b.c === c);
+            if (bombIndex !== -1) {
+                // 爆弾を除去
+                bombPositions.splice(bombIndex, 1);
+
+                setTimeout(() => {
+                    playExplosionSound();
+                    playExplosionEffect();
+                    showToast("💣 爆発！周囲の石が吹き飛んだ！");
+
+                    // 周囲8マスの石を除去
+                    DIRECTIONS.forEach(dir => {
+                        const nr = r + dir[0];
+                        const nc = c + dir[1];
+                        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+                            board[nr][nc] = 0;
+                        }
+                    });
+
+                    renderBoard();
+                    updateStatus();
+
+                    // 即勝利判定（爆弾で旗の上の石が消えた可能性）
+                    if (isSuddenDeathMode) {
+                        const sdResult = checkSuddenDeathWin();
+                        if (sdResult) {
+                            setTimeout(() => endGame(true, sdResult), 300);
+                            return;
+                        }
+                    }
+
+                    setTimeout(() => changeTurn(), 300);
+                }, 300);
+                return;
+            }
+
+            // 即勝利モード判定
+            if (isSuddenDeathMode && involveTarget) {
+                const sdResult = checkSuddenDeathWin();
+                if (sdResult) {
+                    setTimeout(() => endGame(true, sdResult), 500);
+                    updateStatus();
+                    currentTurn = null;
+                    return;
+                }
+            }
+
+            setTimeout(() => changeTurn(), 400);
         }
 
+        function checkSuddenDeathWin() {
+            if (isMultiFlagMode) {
+                // 複数旗モード: 過半数(2個以上)を確保したら即勝利
+                let blackFlags = 0;
+                let whiteFlags = 0;
+                targetPositions.forEach(t => {
+                    if (board[t.r][t.c] === BLACK) blackFlags++;
+                    else if (board[t.r][t.c] === WHITE) whiteFlags++;
+                });
+                const majority = Math.ceil(targetPositions.length / 2);
+                if (blackFlags >= majority) return BLACK;
+                if (whiteFlags >= majority) return WHITE;
+                return null;
+            } else {
+                // 単一旗モード: 旗を取ったら即勝利
+                const t = targetPositions[0];
+                if (board[t.r][t.c] === BLACK) return BLACK;
+                if (board[t.r][t.c] === WHITE) return WHITE;
+                return null;
+            }
+        }
+
+        function cpuMove() {
+            if (gameOver || currentTurn !== WHITE) return;
+            const validMoves = getValidMoves(WHITE);
+            if (validMoves.length === 0) return;
+
+            let bestMove = validMoves[0];
+            let bestScore = -9999;
+
+            for (let move of validMoves) {
+                let score = 0;
+                const isCorner = (move.r === 0 || move.r === BOARD_SIZE - 1) && (move.c === 0 || move.c === BOARD_SIZE - 1);
+                if (isCorner) score += 50;
+
+                // 旗のマス評価（全ての旗をチェック）
+                if (isTargetPos(move.r, move.c)) {
+                    score += isSuddenDeathMode ? 1000 : 100;
+                }
+
+                const flipCells = getFlipCells(move.r, move.c, WHITE);
+
+                // ひっくり返す中に旗が含まれるか
+                if (flipCells.some(pos => isTargetPos(pos.r, pos.c))) {
+                    score += 80;
+                }
+
+                score += flipCells.length;
+
+                // 爆弾マスのリスク評価
+                if (isBombPos(move.r, move.c)) {
+                    // 爆弾で自分の石が多く吹き飛ぶならマイナス
+                    let myLoss = 0;
+                    let oppLoss = 0;
+                    DIRECTIONS.forEach(dir => {
+                        const nr = move.r + dir[0];
+                        const nc = move.c + dir[1];
+                        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+                            if (board[nr][nc] === WHITE) myLoss++;
+                            else if (board[nr][nc] === BLACK) oppLoss++;
+                        }
+                    });
+                    score += (oppLoss - myLoss) * 10;
+                    // 旗の上の石が吹き飛ぶリスク
+                    DIRECTIONS.forEach(dir => {
+                        const nr = move.r + dir[0];
+                        const nc = move.c + dir[1];
+                        if (isTargetPos(nr, nc) && board[nr][nc] === WHITE) {
+                            score -= 200;
+                        }
+                    });
+                }
+
+                // C打ち, X打ちはマイナス評価
+                const isC = (move.r === 0 || move.r === BOARD_SIZE - 1) && (move.c === 1 || move.c === BOARD_SIZE - 2) ||
+                            (move.c === 0 || move.c === BOARD_SIZE - 1) && (move.r === 1 || move.r === BOARD_SIZE - 2);
+                const isX = (move.r === 1 || move.r === BOARD_SIZE - 2) && (move.c === 1 || move.c === BOARD_SIZE - 2);
+
+                if (isC) score -= 20;
+                if (isX) score -= 40;
+
+                score += Math.random() * 5;
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+            }
+
+            placeDisc(bestMove.r, bestMove.c);
+        }
 
         function changeTurn() {
             const nextTurn = currentTurn === BLACK ? WHITE : BLACK;
@@ -647,11 +1399,16 @@
                     endGame();
                     return;
                 } else {
-                    alert((nextTurn === BLACK ? "黒" : "白") + "は置ける場所がないためパスします");
+                    showToast((nextTurn === BLACK ? "黒" : "白") + "は置ける場所がないためパスします");
                 }
             }
             renderBoard();
             updateStatus();
+            startTimer();
+
+            if (isCpuMode && currentTurn === WHITE && !gameOver) {
+                setTimeout(cpuMove, 600);
+            }
         }
 
         function getFlipCells(r, c, player) {
@@ -696,11 +1453,10 @@
             return moves;
         }
 
-        function endGame() {
+        function endGame(isSuddenDeathWin = false, winner = null) {
             gameOver = true;
+            stopTimer();
             renderBoard();
-
-            const flagOwner = board[targetPos.r][targetPos.c];
 
             const modal = document.getElementById('result-modal');
             const title = document.getElementById('winner-title');
@@ -710,29 +1466,85 @@
             let color = "";
             let detailMsg = "";
 
-            if (flagOwner === BLACK) {
-                winMsg = "黒の勝ち！🎉";
-                color = "#212121";
-                detailMsg = "見事、フラッグを確保しました！";
-            } else if (flagOwner === WHITE) {
-                winMsg = "白の勝ち！🎉";
-                color = "#888";
-                detailMsg = "見事、フラッグを確保しました！";
+            if (isSuddenDeathWin && winner) {
+                const winnerColor = winner === BLACK ? "黒" : "白";
+                color = winner === BLACK ? "#212121" : "#888";
+                winMsg = winnerColor + "の勝ち！🎉";
+                if (isMultiFlagMode) {
+                    detailMsg = "旗の過半数を確保して即勝利！";
+                } else {
+                    detailMsg = "見事、いち早くフラッグを奪取しました！";
+                }
+                setTimeout(playFanfareSound, 100);
             } else {
-                winMsg = "引き分け...";
-                color = "#555";
-                detailMsg = "フラッグのあるマスには<br>誰も到達できませんでした...";
+                // 通常終了: 旗の確保数で判定
+                let blackFlags = 0;
+                let whiteFlags = 0;
+                targetPositions.forEach(t => {
+                    if (board[t.r][t.c] === BLACK) blackFlags++;
+                    else if (board[t.r][t.c] === WHITE) whiteFlags++;
+                });
+
+                if (isMultiFlagMode) {
+                    detailMsg = `旗の確保数: 黒 ${blackFlags} - ${whiteFlags} 白`;
+                    if (blackFlags > whiteFlags) {
+                        winMsg = "黒の勝ち！🎉";
+                        color = "#212121";
+                    } else if (whiteFlags > blackFlags) {
+                        winMsg = "白の勝ち！🎉";
+                        color = "#888";
+                    } else if (blackFlags === whiteFlags && blackFlags > 0) {
+                        // 同数の場合は石の数で判定
+                        const counts = getStoneCount();
+                        detailMsg += `<br>石の数: 黒 ${counts.black} - ${counts.white} 白`;
+                        if (counts.black > counts.white) {
+                            winMsg = "黒の勝ち！🎉";
+                            color = "#212121";
+                        } else if (counts.white > counts.black) {
+                            winMsg = "白の勝ち！🎉";
+                            color = "#888";
+                        } else {
+                            winMsg = "引き分け...";
+                            color = "#555";
+                        }
+                    } else {
+                        winMsg = "引き分け...";
+                        color = "#555";
+                        detailMsg = "どちらも旗を確保できませんでした...";
+                    }
+                } else {
+                    const flagOwner = board[targetPositions[0].r][targetPositions[0].c];
+                    if (flagOwner === BLACK) {
+                        winMsg = "黒の勝ち！🎉";
+                        color = "#212121";
+                        detailMsg = "見事、フラッグを確保しました！";
+                    } else if (flagOwner === WHITE) {
+                        winMsg = "白の勝ち！🎉";
+                        color = "#888";
+                        detailMsg = "見事、フラッグを確保しました！";
+                    } else {
+                        winMsg = "引き分け...";
+                        color = "#555";
+                        detailMsg = "フラッグのあるマスには<br>誰も到達できませんでした...";
+                    }
+                }
             }
 
             title.innerText = winMsg;
             title.style.color = color;
             detail.innerHTML = detailMsg;
 
+            // Result icon
+            const iconEl = document.getElementById('result-icon');
+            iconEl.innerHTML = '';
+            iconEl.appendChild(createTrophySVG());
+
             modal.style.display = 'block';
         }
 
         function resetGame() {
             if (confirm("ゲームをリセットして最初から始めますか？")) {
+                stopTimer();
                 initGame();
             }
         }
@@ -766,9 +1578,7 @@
 
         window.onload = () => {
             showPwaPrompt();
-            initGame();
         };
-
 
     </script>
 </body>
