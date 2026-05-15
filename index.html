@@ -597,6 +597,63 @@
             color: #999;
             padding: 0 5px;
         }
+
+        /* --- 更新通知バナー --- */
+        #update-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #0277bd, #039be5);
+            color: white;
+            z-index: 1000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            animation: slideDownBanner 0.4s ease;
+        }
+        #update-banner.show { display: block; }
+        @keyframes slideDownBanner {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        .update-banner-inner {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 14px 16px;
+            text-align: left;
+        }
+        .update-banner-inner h4 {
+            font-size: 14px;
+            margin: 0 0 6px 0;
+        }
+        .update-banner-inner ul {
+            font-size: 12px;
+            opacity: 0.95;
+            padding-left: 18px;
+            margin: 0 0 10px 0;
+            line-height: 1.7;
+        }
+        .update-banner-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .update-banner-btns button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .update-btn-reload {
+            background: white;
+            color: #0277bd;
+        }
+        .update-btn-later {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
     </style>
 </head>
 
@@ -710,6 +767,18 @@
             <button onclick="undoGame()"
                 style="background-color:#78909c; font-size:14px; padding:10px 15px;">待った</button>
             <button onclick="resetGame()">もう一回</button>
+        </div>
+    </div>
+
+    <!-- 更新通知バナー -->
+    <div id="update-banner">
+        <div class="update-banner-inner">
+            <h4 id="update-title">新しいバージョンが利用可能です</h4>
+            <ul id="update-changes"></ul>
+            <div class="update-banner-btns">
+                <button class="update-btn-reload" onclick="applyUpdate()">今すぐ更新</button>
+                <button class="update-btn-later" onclick="dismissUpdate()">あとで</button>
+            </div>
         </div>
     </div>
 
@@ -1565,13 +1634,91 @@
             localStorage.setItem('pwaPromptDismissed', 'true');
         }
 
-        // Service Worker Registration
+        // --- バージョン管理・更新通知 ---
+        const APP_VERSION = '1.1';
+        const RELEASE_NOTES = {
+            '1.1': [
+                '盤面を8×8に変更',
+                '旗3個・2個先取で勝利をデフォルトに',
+                'アップデート通知機能を追加',
+            ],
+        };
+
+        // リロード後にリリースノートを表示
+        (function showReleaseNotesIfUpdated() {
+            const lastVer = localStorage.getItem('jintori_version');
+            if (lastVer && lastVer !== APP_VERSION) {
+                const title = document.getElementById('update-title');
+                const ul = document.getElementById('update-changes');
+                title.textContent = 'ver' + APP_VERSION + ' に更新されました';
+                const notes = RELEASE_NOTES[APP_VERSION] || ['軽微な修正'];
+                ul.innerHTML = notes.map((n) => '<li>' + n + '</li>').join('');
+                // 更新ボタンは隠し、「閉じる」だけ表示
+                document.querySelector('.update-btn-reload').style.display = 'none';
+                document.querySelector('.update-btn-later').textContent = '閉じる';
+                document.getElementById('update-banner').classList.add('show');
+            }
+            localStorage.setItem('jintori_version', APP_VERSION);
+        })();
+
+        let waitingWorker = null;
+
+        function showUpdatePrompt() {
+            const title = document.getElementById('update-title');
+            const ul = document.getElementById('update-changes');
+            title.textContent = '新しいバージョンが利用可能です';
+            ul.innerHTML = '<li>「今すぐ更新」でリロードします</li>';
+            document.querySelector('.update-btn-reload').style.display = '';
+            document.querySelector('.update-btn-later').textContent = 'あとで';
+            document.getElementById('update-banner').classList.add('show');
+        }
+
+        function applyUpdate() {
+            if (waitingWorker) {
+                waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+            } else {
+                window.location.reload();
+            }
+            document.getElementById('update-banner').classList.remove('show');
+        }
+
+        function dismissUpdate() {
+            document.getElementById('update-banner').classList.remove('show');
+        }
+
+        // Service Worker Registration（更新検知付き）
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then((reg) => {
                     console.log('SW registered:', reg);
+
+                    // 既に待機中のSWがあればプロンプト表示
+                    if (reg.waiting && navigator.serviceWorker.controller) {
+                        waitingWorker = reg.waiting;
+                        showUpdatePrompt();
+                    }
+
+                    // 新しいSWのインストールを検知
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (!newWorker) return;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                waitingWorker = newWorker;
+                                showUpdatePrompt();
+                            }
+                        });
+                    });
                 }).catch((err) => {
                     console.error('SW registration failed:', err);
+                });
+
+                // 新SWがactiveになったらリロード
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (refreshing) return;
+                    refreshing = true;
+                    window.location.reload();
                 });
             });
         }
