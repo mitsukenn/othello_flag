@@ -131,8 +131,8 @@
 
         #board {
             display: grid;
-            grid-template-columns: repeat(6, 48px);
-            grid-template-rows: repeat(6, 48px);
+            grid-template-columns: repeat(8, 38px);
+            grid-template-rows: repeat(8, 38px);
             gap: 2px;
             background-color: #3e2723;
             border: 2px solid #3e2723;
@@ -140,8 +140,8 @@
 
         /* 個々のマス */
         .cell {
-            width: 48px;
-            height: 48px;
+            width: 38px;
+            height: 38px;
             background-color: #8bc34a;
             display: flex;
             justify-content: center;
@@ -174,8 +174,8 @@
             z-index: 2;
             top: -2px;
             right: -2px;
-            width: 22px;
-            height: 22px;
+            width: 18px;
+            height: 18px;
             filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));
         }
 
@@ -204,15 +204,15 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.4));
         }
 
         /* 石のデザイン (3D対応) */
         .disc {
-            width: 38px;
-            height: 38px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
             z-index: 10;
@@ -221,12 +221,12 @@
 
         .disc.black {
             background-color: #212121;
-            background: radial-gradient(circle at 14px 14px, #424242, #000);
+            background: radial-gradient(circle at 11px 11px, #424242, #000);
         }
 
         .disc.white {
             background-color: #ffffff;
-            background: radial-gradient(circle at 14px 14px, #fff, #e0e0e0);
+            background: radial-gradient(circle at 11px 11px, #fff, #e0e0e0);
             border: 1px solid #ccc;
         }
 
@@ -390,20 +390,20 @@
             margin-top: 3px;
         }
 
-        @media (max-width: 340px) {
+        @media (max-width: 360px) {
             #board {
-                grid-template-columns: repeat(6, 42px);
-                grid-template-rows: repeat(6, 42px);
+                grid-template-columns: repeat(8, 34px);
+                grid-template-rows: repeat(8, 34px);
             }
 
             .cell {
-                width: 42px;
-                height: 42px;
+                width: 34px;
+                height: 34px;
             }
 
             .disc {
-                width: 34px;
-                height: 34px;
+                width: 26px;
+                height: 26px;
             }
         }
 
@@ -846,7 +846,7 @@
             return svg;
         }
 
-        const BOARD_SIZE = 6;
+        const BOARD_SIZE = 8;
 
         const BLACK = 1;
         const WHITE = 2;
@@ -880,19 +880,19 @@
             [1, -1], [1, 0], [1, 1]
         ];
 
-        // 初期配置のマス（6×6の中央2×2）
+        // 初期配置のマス（8×8の中央2×2）
         function isInitPosition(r, c) {
-            return (r === 2 || r === 3) && (c === 2 || c === 3);
+            return (r === 3 || r === 4) && (c === 3 || c === 4);
         }
 
         function initGame() {
             board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0));
 
-            // 6×6の初期配置（中央2×2）
-            board[2][2] = WHITE;
-            board[2][3] = BLACK;
-            board[3][2] = BLACK;
+            // 8×8の初期配置（中央2×2）
             board[3][3] = WHITE;
+            board[3][4] = BLACK;
+            board[4][3] = BLACK;
+            board[4][4] = WHITE;
 
             // フラッグ配置
             setRandomTargets();
