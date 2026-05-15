@@ -625,7 +625,7 @@
         <div class="option-group">
             <div class="option-group-title">🎮 追加オプション</div>
             <label class="option-item">
-                <input type="checkbox" id="opt-multi-flag">
+                <input type="checkbox" id="opt-multi-flag" checked>
                 <div>
                     <div class="option-label">🚩 旗を3個配置</div>
                     <div class="option-desc">旗が3つに！より多く確保した方が勝ち</div>
@@ -1578,15 +1578,23 @@
 
         window.onload = () => {
             showPwaPrompt();
-            // デフォルト設定で即スタート（2人対戦・旗先取で即勝利・オプションなし）
+            // デフォルト設定で即スタート（2人対戦・旗3個・2個先取で即勝利）
             isCpuMode = false;
             isSuddenDeathMode = true;
-            isMultiFlagMode = false;
+            isMultiFlagMode = true;
             isBombMode = false;
             isTimerMode = false;
 
             document.getElementById('badge-opponent').innerText = "👤 2人で遊ぶ";
             document.getElementById('badge-rule').innerText = "⚡ 旗先取で勝利";
+
+            // 旗3個バッジを追加
+            const badgesEl = document.getElementById('mode-badges');
+            const flagBadge = document.createElement('div');
+            flagBadge.className = 'mode-badge opt-badge';
+            flagBadge.innerText = '🚩×3';
+            badgesEl.appendChild(flagBadge);
+
             document.getElementById('timer-display').style.display = 'none';
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'flex';
